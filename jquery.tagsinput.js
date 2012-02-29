@@ -243,7 +243,6 @@
 					if ($(event.data.fake_input).val()==$(event.data.fake_input).attr('data-default')) { 
 						$(event.data.fake_input).val('');
 					}
-					$(event.data.fake_input).css('color','#000000');		
 				});
 						
 				if (settings.autocomplete_url != undefined) {
