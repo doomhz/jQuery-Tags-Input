@@ -65,6 +65,10 @@ And you can check if a tag exists using tagExist()...
 
 	if ($('#tags').tagExist('foo')) { ... }
 
+You can also provide a validation pattern for the tags as a plugin option:
+
+	validation: "[a-z0-9]"
+
 If additional functionality is required when a tag is added or removed, you may
 specify callback functions via the onAddTag and onRemoveTag parameters.  Both 
 functions should accept a single tag as the parameter.
@@ -96,5 +100,6 @@ option to false.
 	   'removeWithBackspace' : true,
 	   'minChars' : 0,
 	   'maxChars' : 0 //if not provided there is no limit,
-	   'placeholderColor' : '#666666'
+	   'placeholderColor' : '#666666',
+	   'validation': null
 	});

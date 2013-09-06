@@ -1,6 +1,6 @@
 /*
 
-	jQuery Tags Input Plugin 1.3.3
+	jQuery Tags Input Plugin 1.3.4
 	
 	Copyright (c) 2011 XOXCO, Inc
 	
@@ -17,6 +17,7 @@
 (function($) {
 
 	var delimiter = new Array();
+	var validator = null;
 	var tags_callbacks = new Array();
 	$.fn.doAutosize = function(o){
 	    var minWidth = $(this).data('minwidth'),
@@ -84,15 +85,20 @@
 				}
 
 				value = jQuery.trim(value);
-		
-				if (options.unique) {
-					var skipTag = $(tagslist).tagExist(value);
-					if(skipTag == true) {
-					    //Marks fake input as not_valid to let styling it
-    				    $('#'+id+'_tag').addClass('not_valid');
-    				}
+
+				if (!$(this).tagValid(value)) {
+					var skipTag = true;
+					$('#'+id+'_tag').addClass('not_valid');
 				} else {
-					var skipTag = false; 
+					if (options.unique) {
+						var skipTag = $(this).tagExist(value);
+						if(skipTag == true) {
+						    //Marks fake input as not_valid to let styling it
+	    				    $('#'+id+'_tag').addClass('not_valid');
+	    				}
+					} else {
+						var skipTag = false; 
+					}
 				}
 				
 				if (value !='' && skipTag != true) { 
@@ -162,7 +168,17 @@
 		};
 	
 	$.fn.tagExist = function(val) {
-		return (jQuery.inArray(val, $(this)) >= 0); //true when tag exists, false when not
+		var id = $(this).attr('id');
+		var tagslist = $(this).val().split(delimiter[id]);
+		return (jQuery.inArray(val, tagslist) >= 0); //true when tag exists, false when not
+	};
+
+	$.fn.tagValid = function(val) {
+		if (validator) {
+			return validator.test(val);
+		} else {
+			return true;
+		}
 	};
 	
 	// clear all existing tags and import new ones from a string
@@ -187,15 +203,22 @@
       placeholderColor:'#666666',
       autosize: true,
       comfortZone: 20,
-      inputPadding: 6*2
+      inputPadding: 6*2,
+      validation: null
     },options);
+
+    if (settings.validation) {
+    	validator = new RegExp(settings.validation);
+    }
 
 		this.each(function() { 
 			if (settings.hide) { 
 				$(this).hide();				
 			}
-				
-			var id = $(this).attr('id')
+			var id = $(this).attr('id');
+			if (!id || delimiter[$(this).attr('id')]) {
+				id = $(this).attr('id', 'tags' + new Date().getTime()).attr('id');
+			}
 			
 			var data = jQuery.extend({
 				pid:id,
@@ -225,6 +248,7 @@
 			$(markup).insertAfter(this);
 
 			$(data.holder).css('width',settings.width);
+			$(data.holder).css('min-height',settings.height);
 			$(data.holder).css('height',settings.height);
 	
 			if ($(data.real_input).val()!='') { 
@@ -243,6 +267,7 @@
 					if ($(event.data.fake_input).val()==$(event.data.fake_input).attr('data-default')) { 
 						$(event.data.fake_input).val('');
 					}
+					$(event.data.fake_input).css('color','#000000');		
 				});
 						
 				if (settings.autocomplete_url != undefined) {
@@ -320,7 +345,6 @@
 				    });
 				}
 			} // if settings.interactive
-			return false;
 		});
 			
 		return this;
